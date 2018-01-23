@@ -3,32 +3,42 @@ require "openssl"
 require "jwt"
 require "net/http"
 require_relative "lib/token_cache"
+require_relative "database"
 
-# Reads configuration values for the GitHub App
-def config
-  @config ||= JSON.parse(File.read("config.json"))
+configure do
+  # Reads configuration values for the GitHub App
+  config = JSON.parse(File.read("config.json"))
+  config.each do |key, value|
+    set key.to_sym, value
+  end
+
+  DB.configure(config.fetch("database_url"))
+end
+
+def db
+  DB.instance.database
 end
 
 # The Integration ID
 # From "About -> ID" at github.com/settings/apps/<app-name>
 def app_issuer
-  @app_issuer ||= config.fetch("appId")
+  @app_issuer ||= settings.app_id
 end
 
 # Integration webhook secret (for validating that webhooks come from GitHub)
 def webhook_secret
-  @webhook_secret ||= config.fetch("webhookSecret", nil) # optional
+  @webhook_secret ||= settings.webhook_secret
 end
 
 # Are you testing against .localhost or .com, or something else?
 def github_tld
-  @github_tld ||= config.fetch("githubTld")
+  @github_tld ||= settings.github_tld
 end
 
 # PEM file for request signing (PKCS#1 RSAPrivateKey format)
 # (Download from github.com/settings/apps/<app-name> "Private key")
 def private_pem
-  @private_pem ||= File.read(config.fetch("privateKeyFilename"))
+  @private_pem ||= File.read(settings.private_key_filename)
 end
 
 # Private Key for the App, generated based on the PEM file
@@ -47,6 +57,10 @@ def generate_jwt
   }
 
   jwt = JWT.encode(payload, private_key, "RS256")
+end
+
+def token_cache
+  @token_cache ||= TokenCache.new(db)
 end
 
 def debug_route(request)
@@ -85,9 +99,8 @@ def handle_api_response(res)
 end
 
 # Returns a valid auth token for the installation
-# TODO: cache this, because it generates a new token on every call
 def installation_token(id:)
-  if token = TokenCache.lookup_installation_auth_token(id: id)
+  if token = token_cache.lookup_installation_auth_token(id: id)
     return token
   else
     res = gh_api(
@@ -99,7 +112,7 @@ def installation_token(id:)
       payload = JSON.parse(res.body)
       token = payload.fetch("token")
       expires_at = payload.fetch("expires_at")
-      TokenCache.store_installation_auth_token(id: id, token: token, expires_at: expires_at)
+      token_cache.store_installation_auth_token(id: id, token: token, expires_at: expires_at)
       token
     else
       # Bail? ¯\(°_o)/¯

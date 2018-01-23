@@ -1,0 +1,6 @@
+{
+  "webhookSecret":"secret",
+  "privateKeyFilename":"./path-to.private-key.pem",
+  "githubTld":"com",
+  "appId":"1"
+}

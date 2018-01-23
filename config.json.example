@@ -1,6 +1,7 @@
 {
-  "webhookSecret":"secret",
-  "privateKeyFilename":"./path-to.private-key.pem",
-  "githubTld":"com",
-  "appId":"1"
+  "webhook_secret":"secret",
+  "private_key_filename":"./path-to.private-key.pem",
+  "github_tld":"com",
+  "app_id":"1",
+  "database_url":"sqlite://gha.db"
 }

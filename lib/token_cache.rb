@@ -9,7 +9,9 @@ class TokenCache
     results = db[:cached_tokens].where(installation_id: id)
       .where{expires_at >= Time.now}
       .reverse(:expires_at)
-    results.first[:token]
+    if results.any?
+      results.first[:token]
+    end
   end
 
   def store_installation_auth_token(id:, token:, expires_at:)

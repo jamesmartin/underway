@@ -2,6 +2,7 @@ require "sinatra"
 require "openssl"
 require "jwt"
 require "net/http"
+require_relative "lib/token_cache"
 
 # Reads configuration values for the GitHub App
 def config
@@ -86,15 +87,24 @@ end
 # Returns a valid auth token for the installation
 # TODO: cache this, because it generates a new token on every call
 def installation_token(id:)
-  res = gh_api(
+  if token = TokenCache.lookup_installation_auth_token(id: id)
+    return token
+  else
+    res = gh_api(
       "/app/installations/#{params["installation_id"]}/access_tokens",
       method: :post
-  )
+    )
 
-  if res.is_a?(Net::HTTPSuccess)
-    token = JSON.parse(res.body).fetch("token")
-  else
-    # Bail? ¯\(°_o)/¯
+    if res.is_a?(Net::HTTPSuccess)
+      payload = JSON.parse(res.body)
+      token = payload.fetch("token")
+      expires_at = payload.fetch("expires_at")
+      TokenCache.store_installation_auth_token(id: id, token: token, expires_at: expires_at)
+      token
+    else
+      # Bail? ¯\(°_o)/¯
+      logger.info "Couldn't get installation auth token: #{res.code} => #{res.body}"
+    end
   end
 end
 

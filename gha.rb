@@ -68,7 +68,7 @@ def debug_route(request)
 end
 
 def gh_api(route, headers: {}, method: :get)
-  uri = URI("http://api.github.#{github_tld}#{route}")
+  uri = URI("#{settings.github_api_host}#{route}")
 
   req =
     case method
@@ -86,6 +86,9 @@ def gh_api(route, headers: {}, method: :get)
   end
 
   http = Net::HTTP.new(uri.hostname, uri.port)
+  if uri.scheme == "https"
+    http.use_ssl = true
+  end
   http.set_debug_output(logger)
   http.request(req)
 end

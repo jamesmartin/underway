@@ -1,7 +1,7 @@
 {
   "webhook_secret":"secret",
   "private_key_filename":"./path-to.private-key.pem",
-  "github_tld":"com",
+  "github_api_host":"http://api.github.localhost",
   "app_id":"1",
   "database_url":"sqlite://gha.db",
   "slack_token":"correcthorsebatterystaple"

@@ -2,6 +2,7 @@ require "sinatra"
 require "openssl"
 require "jwt"
 require "net/http"
+require "slack"
 require_relative "lib/token_cache"
 require_relative "database"
 
@@ -13,6 +14,10 @@ configure do
   end
 
   DB.configure(config.fetch("database_url"))
+
+  Slack.configure do |slack_config|
+    slack_config.token = config.fetch("slack_token")
+  end
 end
 
 def db
@@ -44,6 +49,10 @@ end
 # Private Key for the App, generated based on the PEM file
 def private_key
   @private_key ||= OpenSSL::PKey::RSA.new(private_pem)
+end
+
+def slack_client
+  @slack_client ||= Slack::Web::Client.new
 end
 
 def generate_jwt
@@ -189,4 +198,39 @@ get "/info/installation/:installation_id/repositories" do
       headers: { "Authorization" => "token #{installation_token(id: params[:installation_id])}" }
     )
  )
+end
+
+post "/create-branch" do
+  require 'pry'; binding.pry
+
+  dialog_payload = {
+    callback_id: Time.now.to_i,
+    title: "Hey!",
+    submit_label: "Create branch",
+    elements: [
+      {
+        "type": "text",
+        "label": "Repository",
+        "name": "repo"
+      },
+      {
+        "type": "text",
+        "label": "Branch (default `master`)",
+        "name": "branch"
+      },
+      {
+        "type": "text",
+        "label": "Team name",
+        "name": "team-name"
+      },
+    ]
+  }
+
+  payload = { dialog: dialog_payload.to_json, trigger_id: params[:trigger_id] }
+
+  slack_client.open_dialog(payload)
+end
+
+get "/dialog" do
+  require 'pry'; binding.pry
 end

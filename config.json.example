@@ -3,5 +3,6 @@
   "private_key_filename":"./path-to.private-key.pem",
   "github_tld":"com",
   "app_id":"1",
-  "database_url":"sqlite://gha.db"
+  "database_url":"sqlite://gha.db",
+  "slack_token":"correcthorsebatterystaple"
 }

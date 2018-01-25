@@ -3,6 +3,7 @@ require "openssl"
 require "jwt"
 require "net/http"
 require "slack"
+require "pry"
 require_relative "lib/token_cache"
 require_relative "database"
 
@@ -201,12 +202,10 @@ get "/info/installation/:installation_id/repositories" do
 end
 
 post "/create-branch" do
-  require 'pry'; binding.pry
-
   dialog_payload = {
     callback_id: Time.now.to_i,
     title: "Hey!",
-    submit_label: "Create branch",
+    submit_label: "Create",
     elements: [
       {
         "type": "text",
@@ -215,7 +214,7 @@ post "/create-branch" do
       },
       {
         "type": "text",
-        "label": "Branch (default `master`)",
+        "label": "Branch",
         "name": "branch"
       },
       {
@@ -228,9 +227,9 @@ post "/create-branch" do
 
   payload = { dialog: dialog_payload.to_json, trigger_id: params[:trigger_id] }
 
-  slack_client.open_dialog(payload)
+  slack_client.dialog_open(payload)
 end
 
-get "/dialog" do
+post "/dialog" do
   require 'pry'; binding.pry
 end

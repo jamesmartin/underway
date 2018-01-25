@@ -3,4 +3,5 @@ source "https://rubygems.org" do
   gem "jwt"
   gem "sqlite3"
   gem "sequel"
+  gem "slack-ruby-client"
 end

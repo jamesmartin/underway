@@ -4,4 +4,5 @@ source "https://rubygems.org" do
   gem "sqlite3"
   gem "sequel"
   gem "slack-ruby-client"
+  gem "pry"
 end

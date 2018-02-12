@@ -2,6 +2,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     jwt (2.1.0)
+    minitest (5.11.1)
     mustermann (1.0.1)
     rack (2.0.3)
     rack-protection (2.0.0)
@@ -20,6 +21,7 @@ PLATFORMS
 
 DEPENDENCIES
   jwt!
+  minitest!
   sequel!
   sinatra!
   sqlite3!

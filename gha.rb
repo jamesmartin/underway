@@ -2,21 +2,15 @@ require "sinatra"
 require "openssl"
 require "jwt"
 require "net/http"
+require_relative "lib/settings"
 require_relative "lib/token_cache"
-require_relative "database"
+require_relative "database" # TODO: move to lib
 
 configure do
   # Reads configuration values for the GitHub App
-  config = JSON.parse(File.read("config.json"))
-  config.each do |key, value|
+  Settings.instance.config.each do |key, value|
     set key.to_sym, value
   end
-
-  DB.configure(config.fetch("database_url"))
-end
-
-def db
-  DB.instance.database
 end
 
 # The Integration ID
@@ -56,11 +50,11 @@ def generate_jwt
     iss: app_issuer
   }
 
-  jwt = JWT.encode(payload, private_key, "RS256")
+  jwt = JWT.encode(payload, Settings.instance.private_key, "RS256")
 end
 
 def token_cache
-  @token_cache ||= TokenCache.new(db)
+  @token_cache ||= TokenCache.new(Settings.instance.db)
 end
 
 def debug_route(request)

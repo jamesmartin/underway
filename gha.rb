@@ -4,7 +4,6 @@ require "jwt"
 require "net/http"
 require_relative "lib/settings"
 require_relative "lib/token_cache"
-require_relative "database" # TODO: move to lib
 
 configure do
   # Reads configuration values for the GitHub App

@@ -1,5 +1,7 @@
-require 'singleton'
-require 'pathname'
+require "singleton"
+require "pathname"
+require "json"
+require_relative "./database"
 
 class Settings
   include Singleton

@@ -1,3 +1,5 @@
 config.json
+config.json.localhost
+config.json.prod*
 *.pem
 *.db

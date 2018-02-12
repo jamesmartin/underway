@@ -6,5 +6,6 @@ source "https://rubygems.org" do
 
   group :test do
     gem "minitest"
+    gem "timecop"
   end
 end

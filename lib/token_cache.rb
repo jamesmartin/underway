@@ -7,7 +7,7 @@ class TokenCache
 
   def lookup_installation_auth_token(id:)
     results = db[:cached_tokens].where(installation_id: id)
-      .where{expires_at >= Time.now}
+      .where{expires_at >= Time.now.utc}
       .reverse(:expires_at)
     if results.any?
       results.first[:token]

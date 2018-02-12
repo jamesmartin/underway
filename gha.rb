@@ -168,7 +168,7 @@ get "/info/app/installations/:installation_id" do
   handle_api_response(gh_api("/app/installations/#{params["installation_id"]}"))
 end
 
-get "/info/app/installations/:installation_id/access_token" do
+get "/info/app/installation/:installation_id/access_token" do
   content_type :json
   handle_api_response(
     gh_api(
@@ -178,7 +178,7 @@ get "/info/app/installations/:installation_id/access_token" do
   )
 end
 
-get "/info/installation/:installation_id/repositories" do
+get "/info/app/installation/:installation_id/repositories" do
   content_type :json
   handle_api_response(
     gh_api(

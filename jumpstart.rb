@@ -28,15 +28,9 @@ def github_tld
   @github_tld ||= settings.github_tld
 end
 
-# PEM file for request signing (PKCS#1 RSAPrivateKey format)
-# (Download from github.com/settings/apps/<app-name> "Private key")
-def private_pem
-  @private_pem ||= File.read(settings.private_key_filename)
-end
-
 # Private Key for the App, generated based on the PEM file
 def private_key
-  @private_key ||= OpenSSL::PKey::RSA.new(private_pem)
+  Settings.instance.private_key
 end
 
 def generate_jwt
@@ -127,9 +121,9 @@ get "/" do
       <li>/hook         => Receives incoming installation and modification Webhooks</li>
       <li>/jwt          => Generates a JWT for authentication as the App</li>
     </pre>
-    <h2>Private PEM</h2>
+    <h2>Private PEM file</h2>
     <pre>
-      #{private_pem}
+      #{Settings.instance.private_key_filename}
     </pre>
   EOS
 end

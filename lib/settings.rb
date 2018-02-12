@@ -32,10 +32,14 @@ class Settings
     @webhook_secret ||= config["webhook_secret"]
   end
 
+  def private_key_filename
+    @app_root.join(config["private_key_filename"])
+  end
+
   # PEM file for request signing (PKCS#1 RSAPrivateKey format)
   # (Download from github.com/settings/apps/<app-name> "Private key")
   def private_pem
-    @private_pem ||= File.read(@app_root.join(config["private_key_filename"]))
+    @private_pem ||= File.read(private_key_filename)
   end
 
   # Private Key for the App, generated based on the PEM file

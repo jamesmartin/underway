@@ -43,8 +43,12 @@ class Settings
   end
 
   # Private Key for the App, generated based on the PEM file
-  def private_key
+ def private_key
     @private_key ||= OpenSSL::PKey::RSA.new(private_pem)
   end
+
+ def verbose_logging
+   @verbose ||= config["verbose_logging"]
+ end
 
 end

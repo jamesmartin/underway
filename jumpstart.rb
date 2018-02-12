@@ -51,7 +51,17 @@ def token_cache
 end
 
 def debug_route(request)
-  logger.info request.inspect
+  log(request.inspect)
+end
+
+def verbose_logging?
+  !!Settings.instance.verbose_logging
+end
+
+def log(message)
+  if verbose_logging?
+    logger.info(message)
+  end
 end
 
 def gh_api(route, headers: {}, method: :get)
@@ -76,7 +86,11 @@ def gh_api(route, headers: {}, method: :get)
   if uri.scheme == "https"
     http.use_ssl = true
   end
-  http.set_debug_output(logger)
+
+  if verbose_logging?
+    http.set_debug_output(logger)
+  end
+
   http.request(req)
 end
 
@@ -91,8 +105,10 @@ end
 # Returns a valid auth token for the installation
 def installation_token(id:)
   if token = token_cache.lookup_installation_auth_token(id: id)
+    log("token cache: hit")
     return token
   else
+    log("token cache: miss")
     res = gh_api(
       "/app/installations/#{params["installation_id"]}/access_tokens",
       method: :post
@@ -106,7 +122,7 @@ def installation_token(id:)
       token
     else
       # Bail? ¯\(°_o)/¯
-      logger.info "Couldn't get installation auth token: #{res.code} => #{res.body}"
+      log("Couldn't get installation auth token: #{res.code} => #{res.body}")
     end
   end
 end

@@ -10,6 +10,8 @@ class DB
   def self.configure(database_url)
     @@db = Sequel.connect(database_url)
 
+    Sequel.default_timezone = :utc
+
     # TODO: extract to schema migration
     @@db.create_table?(:cached_tokens) do
       primary_key   :id

@@ -8,32 +8,32 @@ class TokenCacheTest < SequelTestCase
   end
 
   def test_can_store_and_retrieve_a_token
-    Time.freeze do |now|
+    Timecop.freeze(DateTime.parse("2018-02-12T09:00:00+00:00")) do
       @cache.store_installation_auth_token(
-        id: "some-id",
+        id: 1,
         token: "some-token",
-        expires_at: now + one_hour
+        expires_at: "2018-02-12T10:00:00Z"
       )
 
-      assert_equal "some-token", @cache.lookup_installation_auth_token(id: "some-id")
+      assert_equal "some-token", @cache.lookup_installation_auth_token(id: 1)
     end
   end
 
   def test_retrieves_the_newest_token
-    Time.freeze do |now|
+    Timecop.freeze(DateTime.parse("2018-02-12T09:00:00+00:00")) do
       @cache.store_installation_auth_token(
-        id: "some-id",
+        id: 1,
         token: "first-token",
-        expires_at: now + one_hour
+        expires_at: "2018-02-12T10:00:00Z"
       )
 
       @cache.store_installation_auth_token(
-        id: "some-id",
+        id: 1,
         token: "second-token",
-        expires_at: now + two_hours
+        expires_at: "2018-02-12T11:00:00Z"
       )
 
-      assert_equal "second-token", @cache.lookup_installation_auth_token(id: "some-id")
+      assert_equal "second-token", @cache.lookup_installation_auth_token(id: 1)
     end
   end
 
@@ -42,40 +42,26 @@ class TokenCacheTest < SequelTestCase
   end
 
   def test_returns_nil_for_tokens_that_have_expired
-    Time.freeze do |now|
+    Timecop.freeze(DateTime.parse("2018-02-12T09:00:00+00:00")) do
       @cache.store_installation_auth_token(
-        id: "some-id",
+        id: 1,
         token: "some-token",
-        expires_at: now - one_minute
+        expires_at: "2018-02-12T08:00:00Z"
       )
 
-      assert_nil @cache.lookup_installation_auth_token(id: "some-id")
+      assert_nil @cache.lookup_installation_auth_token(id: 1)
     end
   end
 
   def test_retrieves_a_token_when_the_expiry_is_equal_to_now
-    Time.freeze do |now|
+    Timecop.freeze(DateTime.parse("2018-02-12T09:00:00+00:00")) do
       @cache.store_installation_auth_token(
-        id: "some-id",
+        id: 1,
         token: "some-token",
-        expires_at: now
+        expires_at: "2018-02-12T09:00:00Z"
       )
 
-      assert_equal "some-token", @cache.lookup_installation_auth_token(id: "some-id")
+      assert_equal "some-token", @cache.lookup_installation_auth_token(id: 1)
     end
-  end
-
-  private
-
-  def one_hour
-    (1 * 60 * 60)
-  end
-
-  def two_hours
-    (2 * 60 * 60)
-  end
-
-  def one_minute
-    (1 * 60)
   end
 end

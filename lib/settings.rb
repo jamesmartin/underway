@@ -24,18 +24,18 @@ class Settings
   # The Integration ID
   # From "About -> ID" at github.com/settings/apps/<app-name>
   def app_issuer
-    @app_issuer ||= config['app_id']
+    @app_issuer ||= config["app_id"]
   end
 
   # Integration webhook secret (for validating that webhooks come from GitHub)
   def webhook_secret
-    @webhook_secret ||= config['webhook_secret']
+    @webhook_secret ||= config["webhook_secret"]
   end
 
   # PEM file for request signing (PKCS#1 RSAPrivateKey format)
   # (Download from github.com/settings/apps/<app-name> "Private key")
   def private_pem
-    @private_pem ||= File.read(@app_root.join(config['private_key_filename']))
+    @private_pem ||= File.read(@app_root.join(config["private_key_filename"]))
   end
 
   # Private Key for the App, generated based on the PEM file

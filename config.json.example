@@ -4,5 +4,5 @@
   "github_api_host":"http://api.github.localhost",
   "app_id":"1",
   "database_url":"sqlite://gha.db",
-  "verbose_logging":true
+  "verbose_logging":false
 }

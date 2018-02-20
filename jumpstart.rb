@@ -14,27 +14,6 @@ configure do
   end
 end
 
-# The Integration ID
-# From "About -> ID" at github.com/settings/apps/<app-name>
-def app_issuer
-  @app_issuer ||= settings.app_id
-end
-
-# Integration webhook secret (for validating that webhooks come from GitHub)
-def webhook_secret
-  @webhook_secret ||= settings.webhook_secret
-end
-
-# Are you testing against .localhost or .com, or something else?
-def github_tld
-  @github_tld ||= settings.github_tld
-end
-
-# Private Key for the App, generated based on the PEM file
-def private_key
-  Settings.instance.private_key
-end
-
 def generate_jwt
   payload = {
     # Issued at time:
@@ -42,7 +21,7 @@ def generate_jwt
     # JWT expiration time (10 minute maximum)
     exp: Time.now.to_i + (10 * 60),
     # GitHub Apps identifier
-    iss: app_issuer
+    iss: Settings.instance.app_issuer
   }
 
   jwt = JWT.encode(payload, Settings.instance.private_key, "RS256")

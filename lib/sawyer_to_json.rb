@@ -6,7 +6,7 @@ class SawyerToJson
     JSON.generate(unwrap(object))
   end
 
-  def self.unwrap(object, result = nil)
+  def self.unwrap(object)
     case object
     when Array then object.map { |o| unwrap(o) }
     when Sawyer::Resource then object.to_hash

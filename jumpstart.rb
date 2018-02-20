@@ -2,8 +2,10 @@ require "sinatra"
 require "openssl"
 require "jwt"
 require "net/http"
+require "octokit"
 require_relative "lib/settings"
 require_relative "lib/token_cache"
+require_relative "lib/sawyer_to_json"
 
 configure do
   # Reads configuration values for the GitHub App
@@ -64,41 +66,39 @@ def log(message)
   end
 end
 
-def gh_api(route, headers: {}, method: :get)
-  uri = URI("#{settings.github_api_host}#{route}")
-
-  req =
-    case method
-    when :post
-      Net::HTTP::Post.new(uri)
-    else
-      Net::HTTP::Get.new(uri)
-    end
-
-  default_headers = {
-    "Authorization" => "Bearer #{generate_jwt}",
-    "Accept" => "application/vnd.github.machine-man-preview+json"
-  }.merge(headers).each do |key, value|
-    req[key] = value
+def debug_octokit!
+  stack = Faraday::RackBuilder.new do |builder|
+    builder.use Octokit::Middleware::FollowRedirects
+    builder.use Octokit::Response::RaiseError
+    builder.use Octokit::Response::FeedParser
+    builder.response :logger
+    builder.adapter Faraday.default_adapter
   end
-
-  http = Net::HTTP.new(uri.hostname, uri.port)
-  if uri.scheme == "https"
-    http.use_ssl = true
-  end
-
-  if verbose_logging?
-    http.set_debug_output(logger)
-  end
-
-  http.request(req)
+  Octokit.middleware = stack
 end
 
-def handle_api_response(res)
-  if res.is_a?(Net::HTTPSuccess)
-    res.body
-  else
-    "#{res.code} => #{res.body}"
+# Returns a Sawyer::Resource or PORO
+def gh_api(route, headers: {}, method: :get)
+  debug_octokit! if verbose_logging?
+
+  Octokit.api_endpoint = Settings.instance.config["github_api_host"]
+
+  if !headers[:authorization] && !headers["Authorization"]
+    Octokit.bearer_token = generate_jwt
+  end
+
+  final_headers = {
+    accept: "application/vnd.github.machine-man-preview+json",
+    headers: headers
+  }
+
+  begin
+    case method
+    when :post then Octokit.post(route, final_headers)
+    else Octokit.get(route, final_headers)
+    end
+  rescue Octokit::Error => e
+    { error: e.to_s }
   end
 end
 
@@ -114,16 +114,10 @@ def installation_token(id:)
       method: :post
     )
 
-    if res.is_a?(Net::HTTPSuccess)
-      payload = JSON.parse(res.body)
-      token = payload.fetch("token")
-      expires_at = payload.fetch("expires_at")
-      token_cache.store_installation_auth_token(id: id, token: token, expires_at: expires_at)
-      token
-    else
-      # Bail? ¯\(°_o)/¯
-      log("Couldn't get installation auth token: #{res.code} => #{res.body}")
-    end
+    token = res.token
+    expires_at = res.expires_at.to_s
+    token_cache.store_installation_auth_token(id: id, token: token, expires_at: expires_at)
+    token
   end
 end
 
@@ -164,22 +158,22 @@ end
 
 get "/info/app" do
   content_type :json
-  handle_api_response(gh_api("/app"))
+  SawyerToJson.convert(gh_api("/app"))
 end
 
 get "/info/app/installations" do
   content_type :json
-  handle_api_response(gh_api("/app/installations"))
+  SawyerToJson.convert(gh_api("/app/installations"))
 end
 
 get "/info/app/installations/:installation_id" do
   content_type :json
-  handle_api_response(gh_api("/app/installations/#{params["installation_id"]}"))
+  SawyerToJson.convert(gh_api("/app/installations/#{params["installation_id"]}"))
 end
 
 get "/info/app/installation/:installation_id/access_token" do
   content_type :json
-  handle_api_response(
+  SawyerToJson.convert(
     gh_api(
       "/app/installations/#{params["installation_id"]}/access_tokens",
       method: :post
@@ -189,10 +183,10 @@ end
 
 get "/info/app/installation/:installation_id/repositories" do
   content_type :json
-  handle_api_response(
+  SawyerToJson.convert(
     gh_api(
       "/installation/repositories",
-      headers: { "Authorization" => "token #{installation_token(id: params[:installation_id])}" }
+      headers: { authorization: "token #{installation_token(id: params[:installation_id])}" }
     )
  )
 end

@@ -53,6 +53,10 @@ module Underway
           method: :post
         )
 
+        if error = res[:error]
+          raise ArgumentError.new(error)
+        end
+
         token = res.token
         expires_at = res.expires_at.to_s
         Underway::Settings.config.token_cache.store_installation_auth_token(id: id, token: token, expires_at: expires_at)

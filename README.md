@@ -75,3 +75,33 @@ Underway::Settings.configure do |config|
   config.config_filename = "config.json"
 end
 ```
+
+## Usage
+
+The most useful part of Underway for interacting with GitHub Apps is found in
+the `Underway::Api` class.
+
+For example, right out of the box you can generate a JWT for your App:
+
+```ruby
+Underway::Api.generate_jwt
+```
+
+You can get an access token for a given installation of your App:
+
+```ruby
+installations = Underway::Api.invoke("/app/installations")
+access_token = Underway::Api.installation_token(id: installations.first.id)
+```
+
+Access tokens are cached, to save API calls. When an access token has expired a
+new one will be generated and cached.
+
+To get a list of repositories to which an installation of your App has access,
+try this:
+
+```ruby
+installations = Underway::Api.invoke("/app/installations")
+access_token = Underway::Api.installation_token(id: installations.first.id)
+repositories = Underway::Api.invoke("/installation/repositories", headers: { authorization: "token #{access_token}" })
+```

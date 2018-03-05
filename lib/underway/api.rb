@@ -41,6 +41,25 @@ module Underway
       JWT.encode(payload, Underway::Settings.config.private_key, "RS256")
     end
 
+    # Returns a valid auth token for the installation
+    def self.installation_token(id:)
+      if token = Underway::Settings.config.token_cache.lookup_installation_auth_token(id: id)
+        log("token cache: hit")
+        return token
+      else
+        log("token cache: miss")
+        res = invoke(
+          "/app/installations/#{id}/access_tokens",
+          method: :post
+        )
+
+        token = res.token
+        expires_at = res.expires_at.to_s
+        Underway::Settings.config.token_cache.store_installation_auth_token(id: id, token: token, expires_at: expires_at)
+        token
+      end
+    end
+
     def self.debug_octokit!
       stack = Faraday::RackBuilder.new do |builder|
         builder.use Octokit::Middleware::FollowRedirects

@@ -4,7 +4,11 @@ require "json"
 module Underway
   class Settings
     class Configuration
-      attr_reader :config
+      attr_reader :config, :logger
+
+      def initialize
+        @logger = Underway::Logger.new
+      end
 
       def load!
         @config = JSON.parse(
@@ -25,11 +29,16 @@ module Underway
         @config_filename = filename
       end
 
+      def logger=(logger)
+        @logger = logger
+      end
+
       def db
-        @db ||= begin
-                  Underway::DB.configure(config["database_url"])
-                  Underway::DB.instance.database
-                end
+        @db ||=
+          begin
+            Underway::DB.configure(config["database_url"])
+            Underway::DB.instance.database
+          end
       end
 
       # The Integration ID
@@ -60,6 +69,10 @@ module Underway
 
       def verbose_logging
         @verbose ||= config["verbose_logging"]
+      end
+
+      def token_cache
+        @token_cache ||= Underway::TokenCache.new(db)
       end
     end
 

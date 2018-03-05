@@ -1,0 +1,6 @@
+source "https://rubygems.org" do
+  local_gem_path = File.expand_path("../../", __FILE__)
+  gem "underway", path: local_gem_path
+
+  gem "sinatra"
+end

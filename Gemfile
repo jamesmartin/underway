@@ -1,12 +1,3 @@
-source "https://rubygems.org" do
-  gem "sinatra"
-  gem "jwt"
-  gem "sqlite3"
-  gem "sequel"
-  gem "octokit", "~> 4.0"
+source "https://rubygems.org"
 
-  group :test do
-    gem "minitest"
-    gem "timecop"
-  end
-end
+gemspec

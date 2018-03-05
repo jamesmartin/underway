@@ -1,10 +1,10 @@
-require_relative "../lib/database"
+#require_relative "../lib/database"
 
 # http://sequel.jeremyevans.net/rdoc/files/doc/testing_rdoc.html
 
 class SequelTestCase < Minitest::Test
   def run(*args, &block)
-    DB.configure("sqlite:/") # Always assume an in-memory database for now
+    Underway::DB.configure("sqlite:/") # Always assume an in-memory database for now
 
     Sequel::Model.db.transaction(
       rollback: :always,

@@ -1,5 +1,7 @@
 # Underway
 
+[![Build Status](https://travis-ci.org/jamesmartin/underway.svg?branch=master)](https://travis-ci.org/jamesmartin/underway)
+
 Underway is a Ruby gem that helps developers quickly prototype [GitHub
 Apps](https://developer.github.com/apps/).
 

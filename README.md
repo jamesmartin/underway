@@ -45,8 +45,10 @@ When you're done creating a new App you should have:
 - A private key file (.pem)
 - A webhook secret (optional)
 
-Make a copy of the [config.json.example]() file in a location readable by your
-application and edit the file to match your GitHub App's settings.
+Make a copy of the
+[config.json.example](https://github.com/jamesmartin/underway/blob/master/config.json.example)
+file in a location readable by your application and edit the file to match your
+GitHub App's settings.
 
 At its core, Underway is just a Ruby library and can be used in virtually any
 application.  To get started quickly and test out your new GitHub App you might

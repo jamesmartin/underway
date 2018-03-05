@@ -1,8 +1,6 @@
 require "sinatra"
 require "openssl"
-require "jwt"
 require "net/http"
-require "octokit"
 require "underway"
 
 configure do
@@ -10,19 +8,6 @@ configure do
     config.app_root = __FILE__
     config.config_filename = "config.json"
   end
-end
-
-def generate_jwt
-  payload = {
-    # Issued at time:
-    iat: Time.now.to_i,
-    # JWT expiration time (10 minute maximum)
-    exp: Time.now.to_i + (10 * 60),
-    # GitHub Apps identifier
-    iss: Underway::Settings.config.app_issuer
-  }
-
-  jwt = JWT.encode(payload, Underway::Settings.config.private_key, "RS256")
 end
 
 def token_cache
@@ -43,40 +28,9 @@ def log(message)
   end
 end
 
-def debug_octokit!
-  stack = Faraday::RackBuilder.new do |builder|
-    builder.use Octokit::Middleware::FollowRedirects
-    builder.use Octokit::Response::RaiseError
-    builder.use Octokit::Response::FeedParser
-    builder.response :logger
-    builder.adapter Faraday.default_adapter
-  end
-  Octokit.middleware = stack
-end
-
 # Returns a Sawyer::Resource or PORO
-def gh_api(route, headers: {}, method: :get)
-  debug_octokit! if verbose_logging?
-
-  Octokit.api_endpoint = Underway::Settings.config.raw["github_api_host"]
-
-  if !headers[:authorization] && !headers["Authorization"]
-    Octokit.bearer_token = generate_jwt
-  end
-
-  final_headers = {
-    accept: "application/vnd.github.machine-man-preview+json",
-    headers: headers
-  }
-
-  begin
-    case method
-    when :post then Octokit.post(route, final_headers)
-    else Octokit.get(route, final_headers)
-    end
-  rescue Octokit::Error => e
-    { error: e.to_s }
-  end
+def gh_api(*args)
+  Underway::Api.invoke(*args)
 end
 
 # Returns a valid auth token for the installation
@@ -130,7 +84,7 @@ end
 
 get "/jwt" do
   content_type :json
-  generate_jwt
+  Underway::Api.generate_jwt
 end
 
 get "/info/app" do

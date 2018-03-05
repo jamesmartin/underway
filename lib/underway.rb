@@ -1,3 +1,4 @@
+require "underway/api"
 require "underway/database"
 require "underway/version"
 require "underway/settings"

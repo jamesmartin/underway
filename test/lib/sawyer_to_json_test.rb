@@ -1,5 +1,4 @@
 require_relative "../test_helper"
-require_relative "../../lib/sawyer_to_json"
 
 class SawyerToJsonTest < SequelTestCase
 
@@ -7,13 +6,13 @@ class SawyerToJsonTest < SequelTestCase
   end
 
   def test_can_convert_an_empty_array
-    assert_equal "[]", SawyerToJson.convert([])
+    assert_equal "[]", Underway::SawyerToJson.convert([])
   end
 
   def test_can_convert_an_array_with_nested_hash
     obj = [ { foo: "bar" } ]
     expected = "[{\"foo\":\"bar\"}]"
-    actual = SawyerToJson.convert(obj)
+    actual = Underway::SawyerToJson.convert(obj)
 
     assert_equal expected, actual
   end
@@ -24,7 +23,7 @@ class SawyerToJsonTest < SequelTestCase
     resource = Sawyer::Resource.new(agent, agent.decode_body(data))
     obj = [ resource ]
     expected = "[{\"foo\":\"bar\"}]"
-    actual = SawyerToJson.convert(obj)
+    actual = Underway::SawyerToJson.convert(obj)
 
     assert_equal expected, actual
   end

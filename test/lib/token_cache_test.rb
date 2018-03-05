@@ -1,10 +1,9 @@
 require_relative "../test_helper"
-require_relative "../../lib/token_cache"
 
 class TokenCacheTest < SequelTestCase
 
   def setup
-    @cache = TokenCache.new(DB.instance.database)
+    @cache = Underway::TokenCache.new(Underway::DB.instance.database)
   end
 
   def test_can_store_and_retrieve_a_token

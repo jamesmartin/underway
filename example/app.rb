@@ -3,14 +3,12 @@ require "openssl"
 require "jwt"
 require "net/http"
 require "octokit"
-require_relative "lib/settings"
-require_relative "lib/token_cache"
-require_relative "lib/sawyer_to_json"
+require "underway"
 
 configure do
-  # Reads configuration values for the GitHub App
-  Settings.instance.config.each do |key, value|
-    set key.to_sym, value
+  Underway::Settings.configure do |config|
+    config.app_root = __FILE__
+    config.config_filename = "config.json"
   end
 end
 
@@ -21,14 +19,14 @@ def generate_jwt
     # JWT expiration time (10 minute maximum)
     exp: Time.now.to_i + (10 * 60),
     # GitHub Apps identifier
-    iss: Settings.instance.app_issuer
+    iss: Underway::Settings.config.app_issuer
   }
 
-  jwt = JWT.encode(payload, Settings.instance.private_key, "RS256")
+  jwt = JWT.encode(payload, Underway::Settings.config.private_key, "RS256")
 end
 
 def token_cache
-  @token_cache ||= TokenCache.new(Settings.instance.db)
+  @token_cache ||= Underway::TokenCache.new(Underway::Settings.config.db)
 end
 
 def debug_route(request)
@@ -36,7 +34,7 @@ def debug_route(request)
 end
 
 def verbose_logging?
-  !!Settings.instance.verbose_logging
+  !!Underway::Settings.config.verbose_logging
 end
 
 def log(message)
@@ -60,7 +58,7 @@ end
 def gh_api(route, headers: {}, method: :get)
   debug_octokit! if verbose_logging?
 
-  Octokit.api_endpoint = Settings.instance.config["github_api_host"]
+  Octokit.api_endpoint = Underway::Settings.config.raw["github_api_host"]
 
   if !headers[:authorization] && !headers["Authorization"]
     Octokit.bearer_token = generate_jwt
@@ -112,7 +110,7 @@ get "/" do
     </pre>
     <h2>Private PEM file</h2>
     <pre>
-      #{Settings.instance.private_key_filename}
+      #{Underway::Settings.config.private_key_filename}
     </pre>
   EOS
 end
@@ -137,22 +135,22 @@ end
 
 get "/info/app" do
   content_type :json
-  SawyerToJson.convert(gh_api("/app"))
+  Underway::SawyerToJson.convert(gh_api("/app"))
 end
 
 get "/info/app/installations" do
   content_type :json
-  SawyerToJson.convert(gh_api("/app/installations"))
+  Underway::SawyerToJson.convert(gh_api("/app/installations"))
 end
 
 get "/info/app/installations/:installation_id" do
   content_type :json
-  SawyerToJson.convert(gh_api("/app/installations/#{params["installation_id"]}"))
+  Underway::SawyerToJson.convert(gh_api("/app/installations/#{params["installation_id"]}"))
 end
 
 get "/info/app/installation/:installation_id/access_token" do
   content_type :json
-  SawyerToJson.convert(
+  Underway::SawyerToJson.convert(
     gh_api(
       "/app/installations/#{params["installation_id"]}/access_tokens",
       method: :post
@@ -162,10 +160,10 @@ end
 
 get "/info/app/installation/:installation_id/repositories" do
   content_type :json
-  SawyerToJson.convert(
+  Underway::SawyerToJson.convert(
     gh_api(
       "/installation/repositories",
       headers: { authorization: "token #{installation_token(id: params[:installation_id])}" }
     )
- )
+  )
 end

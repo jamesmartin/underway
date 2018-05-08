@@ -1,5 +1,6 @@
 require "sinatra"
 require "underway"
+require "underway/sinatra"
 
 configure do
   Underway::Settings.configure do |config|

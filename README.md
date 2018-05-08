@@ -16,6 +16,12 @@ access token for your App and its installations. Starting with a Sinatra
 application is a fast way to build a GitHub App prototype and explore how
 GitHub Apps work with the GitHub REST API.
 
+## Changelog
+
+This project adheres to [Semantic Versioning](http://semver.org). All notable
+changes are documented in the
+[CHANGELOG](https://github.com/jamesmartin/underway/blob/master/CHANGELOG.md).
+
 ## Installation
 
 Add this line to your application's Gemfile:

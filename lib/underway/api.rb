@@ -78,5 +78,11 @@ module Underway
     def self.verbose_logging?
       !!Underway::Settings.config.verbose_logging
     end
+
+    def self.log(message)
+      if verbose_logging?
+        ::Underway::Settings.config.logger.info(message)
+      end
+    end
   end
 end

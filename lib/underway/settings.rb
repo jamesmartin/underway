@@ -74,6 +74,18 @@ module Underway
       def token_cache
         @token_cache ||= Underway::TokenCache.new(db)
       end
+
+      def webhook_endpoint
+        @webhook_endpoint ||= config&.fetch("webhook_endpoint") || "/hooks"
+      end
+
+      def open_ssl_available=(boolean)
+        @open_ssl_available = !!boolean
+      end
+
+      def open_ssl_available?
+        !!@open_ssl_available
+      end
     end
 
     @configuration = Configuration.new

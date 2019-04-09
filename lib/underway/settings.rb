@@ -1,3 +1,4 @@
+require "addressable/uri"
 require "pathname"
 require "json"
 
@@ -73,6 +74,25 @@ module Underway
 
       def token_cache
         @token_cache ||= Underway::TokenCache.new(db)
+      end
+
+      def oauth_authorize_url
+        uri = Addressable::URI.parse(config["github_api_host"])
+        "#{uri.scheme}://#{uri.domain}/login/oauth/authorize?client_id=#{config["client_id"]}"
+      end
+
+      def oauth_access_token_url(code)
+        api_host = Addressable::URI.parse(config["github_api_host"])
+        template = Addressable::Template.new(
+          "{scheme}://{host}/login/oauth/access_token{?code,client_id,client_secret}"
+        )
+        template.expand(
+          "scheme" => api_host.scheme,
+          "host" => api_host.domain,
+          "code" => code,
+          "client_id" => config["client_id"],
+          "client_secret" => config["client_secret"]
+        )
       end
     end
 

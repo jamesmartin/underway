@@ -96,7 +96,7 @@ Underway::Api.generate_jwt
 You can get an access token for a given installation of your App:
 
 ```ruby
-installations = Underway::Api.invoke("/app/installations")
+installations = Underway::Api.invoke("app/installations")
 access_token = Underway::Api.installation_token(id: installations.first.id)
 ```
 
@@ -107,7 +107,7 @@ To get a list of repositories to which an installation of your App has access,
 try this:
 
 ```ruby
-installations = Underway::Api.invoke("/app/installations")
+installations = Underway::Api.invoke("app/installations")
 access_token = Underway::Api.installation_token(id: installations.first.id)
-repositories = Underway::Api.invoke("/installation/repositories", headers: { authorization: "token #{access_token}" })
+repositories = Underway::Api.invoke("installation/repositories", headers: { authorization: "token #{access_token}" })
 ```

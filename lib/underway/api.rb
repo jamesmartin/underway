@@ -63,7 +63,7 @@ module Underway
       else
         log("token cache: miss")
         res = invoke(
-          "/app/installations/#{id}/access_tokens",
+          "app/installations/#{id}/access_tokens",
           method: :post
         )
 

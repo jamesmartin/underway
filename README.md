@@ -27,7 +27,7 @@ changes are documented in the
 Add this line to your application's Gemfile:
 
 ```ruby
-gem "underway", "~> 1.0"
+gem "underway", "~> 1.1"
 ```
 
 And then run:

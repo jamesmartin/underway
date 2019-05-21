@@ -28,6 +28,20 @@ module Underway
       end
     end
 
+    def self.client_for(installation_id: nil, access_token: nil)
+      token = access_token
+      if !installation_id.nil?
+        token = installation_token(id: installation_id)
+      end
+
+      return if token.nil?
+
+      client = Octokit::Client.new(
+        api_endpoint: Underway::Settings.config.raw["github_api_host"],
+        access_token: token
+      )
+    end
+
     def self.generate_jwt
       payload = {
         # Issued at time:

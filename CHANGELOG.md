@@ -3,7 +3,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased][unreleased]
-- Nothing
+- `Underway::Api.client_for` helper that returns a configured `Octokit` client
+  for a given installation ID or access token
 
 ## [1.0.1] - 2018-05-09
 ### Fixed

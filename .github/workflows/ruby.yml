@@ -1,4 +1,4 @@
-name: Ruby
+name: RSpec
 
 on: [push]
 
@@ -15,6 +15,6 @@ jobs:
         version: 2.6.x
     - name: Build and test with Rake
       run: |
-        gem install -v 2.0.1 bundler --no-rdoc --no-ri
+        gem install bundler
         bundle install --jobs 4 --retry 3
-        bundle exec rake
+        bundle exec rspec

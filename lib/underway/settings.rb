@@ -96,10 +96,14 @@ module Underway
       end
     end
 
-    @configuration = Configuration.new
 
     class << self
-      attr_reader :configuration
+      attr_accessor :configuration
+
+      def reset!
+        self.configuration = Configuration.new
+      end
+
 
       def configure
         if block_given?
@@ -117,5 +121,6 @@ module Underway
       end
     end
 
+    reset!
   end
 end

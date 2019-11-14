@@ -1,0 +1,9 @@
+{
+  "webhook_secret":"secret",
+  "private_key_filename":"./test.2019-11-13.private-key.pem",
+  "github_api_host":"http://api.github.localhost",
+  "app_id":"1",
+  "client_id":"2",
+  "database_url":"sqlite://gha.db",
+  "verbose_logging":false
+}

@@ -19,5 +19,6 @@ rdoc
 test/tmp
 test/version_tmp
 !test/fixtures/test.2019-11-13.private-key.pem
+!test/fixtures/config.json
 tmp
 .ruby-*

@@ -5,7 +5,7 @@ require "json"
 module Underway
   class Settings
     class Configuration
-      attr_reader :config, :logger
+      attr_reader :logger
       attr_writer :webhook_secret, :app_issuer, :client_id, :private_pem, :database_url, :verbose_logging, :github_api_host
 
       def initialize

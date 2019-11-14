@@ -4,7 +4,7 @@ require "octokit"
 module Underway
   class Api
     # Returns a Sawyer::Resource or PORO from the GitHub REST API
-    def self.invoke(route, headers: {}, method: :get)
+    def self.invoke(route, headers: {}, data: {}, method: :get)
       debug_octokit! if verbose_logging?
 
       Octokit.api_endpoint = Underway::Settings.config.raw["github_api_host"]
@@ -13,15 +13,15 @@ module Underway
         Octokit.bearer_token = generate_jwt
       end
 
-      final_headers = {
+      options = {
         accept: "application/vnd.github.machine-man-preview+json",
         headers: headers
       }
 
       begin
         case method
-        when :post then Octokit.post(route, final_headers)
-        else Octokit.get(route, final_headers)
+        when :post then Octokit.post(route, options.merge(data))
+        else Octokit.get(route, options)
         end
       rescue Octokit::Error => e
         { error: e.to_s }

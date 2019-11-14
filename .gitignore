@@ -18,5 +18,6 @@ pkg
 rdoc
 test/tmp
 test/version_tmp
+!test/fixtures/test.2019-11-13.private-key.pem
 tmp
 .ruby-*

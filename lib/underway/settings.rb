@@ -79,7 +79,8 @@ module Underway
       end
 
       def verbose_logging
-        @verbose_logging ||= config["verbose_logging"]
+        return @verbose_logging if defined?(@verbose_logging)
+        @verbose_logging = config["verbose_logging"]
       end
 
       def token_cache

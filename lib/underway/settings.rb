@@ -6,15 +6,21 @@ module Underway
   class Settings
     class Configuration
       attr_reader :config, :logger
+      attr_writer :webhook_secret, :app_issuer, :client_id, :private_pem, :database_url, :verbose_logging, :github_api_host
 
       def initialize
         @logger = Underway::Logger.new
       end
 
-      def load!
-        @config = JSON.parse(
-          @app_root.join(@config_filename).read
-        )
+      def config
+        if @config_filename
+          @config ||= JSON.parse(
+            @app_root.join(@config_filename).read
+          )
+        else
+          raise ArgumentError, "No config_filename given"
+        end
+
       end
 
       # TODO: deprecate
@@ -34,10 +40,14 @@ module Underway
         @logger = logger
       end
 
+      def database_url
+        @database_url ||= config["database_url"]
+      end
+
       def db
         @db ||=
           begin
-            Underway::DB.configure(config["database_url"])
+            Underway::DB.configure(database_url)
             Underway::DB.instance.database
           end
       end
@@ -69,20 +79,29 @@ module Underway
       end
 
       def verbose_logging
-        @verbose ||= config["verbose_logging"]
+        @verbose_logging ||= config["verbose_logging"]
       end
 
       def token_cache
         @token_cache ||= Underway::TokenCache.new(db)
       end
 
+      def github_api_host
+        @github_api_host ||= config["github_api_host"]
+      end
+
+      def client_id
+        @client_id ||= config["client_id"]
+      end
+
       def oauth_authorize_url
-        uri = Addressable::URI.parse(config["github_api_host"])
-        "#{uri.scheme}://#{uri.domain}/login/oauth/authorize?client_id=#{config["client_id"]}"
+        uri = Addressable::URI.parse(github_api_host)
+
+        "#{uri.scheme}://#{uri.domain}/login/oauth/authorize?client_id=#{client_id}"
       end
 
       def oauth_access_token_url(code)
-        api_host = Addressable::URI.parse(config["github_api_host"])
+        api_host = Addressable::URI.parse(github_api_host)
         template = Addressable::Template.new(
           "{scheme}://{host}/login/oauth/access_token{?code,client_id,client_secret}"
         )
@@ -111,8 +130,6 @@ module Underway
         else
           raise ArgumentError.new("Please set configuration by passing a block")
         end
-
-        configuration.load!
       end
 
       # TODO: remove me

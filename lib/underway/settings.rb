@@ -64,7 +64,11 @@ module Underway
       end
 
       def private_key_filename
-        @app_root.join(config["private_key_filename"])
+        @private_key_filename ||= @app_root.join(config["private_key_filename"])
+      end
+
+      def private_key_filename=(filename)
+        @private_key_filename = @app_root.join(filename)
       end
 
       # PEM file for request signing (PKCS#1 RSAPrivateKey format)

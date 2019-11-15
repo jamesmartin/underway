@@ -3,20 +3,19 @@ require_relative "../test_helper"
 class SettingsTest < Minitest::Test
   def setup
     Underway::Settings.reset!
+    @root = Pathname.new(__FILE__).dirname.join("../fixtures")
   end
 
   def test_configure
-    root = Pathname.new(__FILE__).dirname.join("../fixtures")
     Underway::Settings.configure do |config|
       # FIXME seems weird this calls dirname on the argument?
-      config.app_root = root.join("app.rb")
+      config.app_root = @root.join("app.rb")
       config.config_filename = "config.json"
     end
 
-
     assert_equal "1", Underway::Settings.configuration.app_issuer
 
-    private_pem = root.join("./test.2019-11-13.private-key.pem")
+    private_pem = @root.join("./test.2019-11-13.private-key.pem")
     private_key = OpenSSL::PKey::RSA.new(private_pem.read.to_s)
     assert_equal private_pem.expand_path, Underway::Settings.configuration.private_key_filename.expand_path
     assert_equal private_pem.read, Underway::Settings.configuration.private_pem
@@ -26,6 +25,36 @@ class SettingsTest < Minitest::Test
 
     assert_equal false, Underway::Settings.configuration.verbose_logging
     assert_equal "http://github.localhost/login/oauth/authorize?client_id=2", Underway::Settings.configuration.oauth_authorize_url
+  end
+
+  def test_configure_without_config_file
+    Underway::Settings.configure do |config|
+      config.app_root = @root.join("app.rb")
+      config.private_key_filename = "./test.2019-11-13.private-key.pem"
+
+      config.webhook_secret = "trololol"
+      config.app_issuer = "4"
+      config.client_id = "5"
+      config.database_url = "sqlite://github-app.db"
+      config.verbose_logging = true
+      config.github_api_host = "http://api.github.localhost"
+    end
+
+
+    assert_equal "4", Underway::Settings.configuration.app_issuer
+
+    private_pem = @root.join("./test.2019-11-13.private-key.pem")
+    assert_equal private_pem.expand_path, Underway::Settings.configuration.private_key_filename.expand_path
+    assert_equal private_pem.read, Underway::Settings.configuration.private_pem
+
+    private_key = OpenSSL::PKey::RSA.new(private_pem.read.to_s)
+    assert_kind_of OpenSSL::PKey::RSA, Underway::Settings.configuration.private_key
+    # FIXME how to check this is actually loaded?
+    # assert_equal private_key, Underway::Settings.configuration.private_key
+
+    assert_equal true, Underway::Settings.configuration.verbose_logging
+    assert_equal "http://github.localhost/login/oauth/authorize?client_id=5", Underway::Settings.configuration.oauth_authorize_url
+
   end
 
   def test_configure_without_config_file_or_pem_file

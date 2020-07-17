@@ -8,12 +8,12 @@ module Sinatra
     end
 
     def verbose_logging?
-      !!::Underway::Settings.config.verbose_logging
+      !!::Underway::Settings.configuration.verbose_logging
     end
 
     def log(message)
       if verbose_logging?
-        ::Underway::Settings.config.logger.info(message)
+        ::Underway::Settings.configuration.logger.info(message)
       end
     end
 

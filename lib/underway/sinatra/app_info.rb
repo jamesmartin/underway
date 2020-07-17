@@ -30,7 +30,7 @@ module Sinatra
             </pre>
             <h2>Private PEM file</h2>
             <pre>
-              #{::Underway::Settings.config.private_key_filename}
+              #{::Underway::Settings.configuration.private_key_filename}
             </pre>
           EOS
         end

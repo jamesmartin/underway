@@ -7,7 +7,7 @@ module Underway
     def self.invoke(route, headers: {}, data: {}, method: :get)
       debug_octokit! if verbose_logging?
 
-      Octokit.api_endpoint = Underway::Settings.config.raw["github_api_host"]
+      Octokit.api_endpoint = Underway::Settings.configuration.raw["github_api_host"]
 
       if !headers[:authorization] && !headers["Authorization"]
         Octokit.bearer_token = generate_jwt
@@ -37,7 +37,7 @@ module Underway
       return if token.nil?
 
       client = Octokit::Client.new(
-        api_endpoint: Underway::Settings.config.raw["github_api_host"],
+        api_endpoint: Underway::Settings.configuration.raw["github_api_host"],
         access_token: token
       )
     end
@@ -49,15 +49,15 @@ module Underway
         # JWT expiration time (10 minute maximum)
         exp: Time.now.to_i + (10 * 60),
         # GitHub Apps identifier
-        iss: Underway::Settings.config.app_id
+        iss: Underway::Settings.configuration.app_id
       }
 
-      JWT.encode(payload, Underway::Settings.config.private_key, "RS256")
+      JWT.encode(payload, Underway::Settings.configuration.private_key, "RS256")
     end
 
     # Returns a valid auth token for the installation
     def self.installation_token(id:)
-      if token = Underway::Settings.config.token_cache.lookup_installation_auth_token(id: id)
+      if token = Underway::Settings.configuration.token_cache.lookup_installation_auth_token(id: id)
         log("token cache: hit")
         return token
       else
@@ -73,7 +73,7 @@ module Underway
 
         token = res.token
         expires_at = res.expires_at.to_s
-        Underway::Settings.config.token_cache.store_installation_auth_token(id: id, token: token, expires_at: expires_at)
+        Underway::Settings.configuration.token_cache.store_installation_auth_token(id: id, token: token, expires_at: expires_at)
         token
       end
     end
@@ -90,12 +90,12 @@ module Underway
     end
 
     def self.verbose_logging?
-      !!Underway::Settings.config.verbose_logging
+      !!Underway::Settings.configuration.verbose_logging
     end
 
     def self.log(message)
       if verbose_logging?
-        ::Underway::Settings.config.logger.info(message)
+        ::Underway::Settings.configuration.logger.info(message)
       end
     end
   end

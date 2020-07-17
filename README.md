@@ -73,12 +73,25 @@ Sinatra application, do something like this:
 ```ruby
 require "underway"
 
-# This assumes that your configuration file and private key file is located in
-# the same directory as the current ruby file.
+Underway::Settings.configure do |config|
+  config.config_filename = "./config.json"
+end
+```
+
+You can also configure Underway by individually setting its configuration
+attributes:
+
+```
+require "underway"
 
 Underway::Settings.configure do |config|
-  config.app_root = __FILE__
-  config.config_filename = "config.json"
+  config.app_id = "some-app-id"
+  config.client_id = "some-client-id"
+  config.client_secret = "some-client-secret"
+  config.database_url = "/some/db/url"
+  config.github_api_host = "https://api.github.com"
+  config.webhook_secret = "some-webhook-secret"
+  config.private_key = "my-pem"
 end
 ```
 

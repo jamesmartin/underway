@@ -11,13 +11,16 @@ module Underway
         :client_id,
         :client_secret,
         :database_url,
+        :github_api_host,
         :logger,
         :private_key,
         :private_key_filename,
+        :verbose_logging,
         :webhook_secret,
       ].freeze
 
-      attr_reader :app_id, :app_root, :client_id, :client_secret, :database_url, :logger
+      attr_reader :app_id, :app_root, :client_id, :client_secret, :database_url,
+        :github_api_host, :logger, :verbose_logging, :webhook_secret
 
 
       def initialize
@@ -62,6 +65,10 @@ module Underway
           end
       end
 
+      def github_api_host=(host)
+        @github_api_host = host
+      end
+
       # The Integration ID
       # From "About -> ID" at github.com/settings/apps/<app-name>
       def app_id=(id)
@@ -77,10 +84,6 @@ module Underway
       end
 
       # Integration webhook secret (for validating that webhooks come from GitHub)
-      def webhook_secret
-        @webhook_secret ||= config["webhook_secret"]
-      end
-
       def webhook_secret=(secret)
         @webhook_secret = secret
       end
@@ -111,10 +114,6 @@ module Underway
         @private_key = key
       end
 
-      def verbose_logging
-        @verbose ||= config["verbose_logging"]
-      end
-
       def verbose_logging=(verbose)
         @verbose_logging = !!verbose
       end
@@ -124,12 +123,12 @@ module Underway
       end
 
       def oauth_authorize_url
-        uri = Addressable::URI.parse(config["github_api_host"])
+        uri = Addressable::URI.parse(github_api_host)
         "#{uri.scheme}://#{uri.domain}/login/oauth/authorize?client_id=#{client_id}"
       end
 
       def oauth_access_token_url(code)
-        api_host = Addressable::URI.parse(config["github_api_host"])
+        api_host = Addressable::URI.parse(github_api_host)
         template = Addressable::Template.new(
           "{scheme}://{host}/login/oauth/access_token{?code,client_id,client_secret}"
         )

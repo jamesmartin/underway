@@ -7,7 +7,7 @@ module Underway
     def self.invoke(route, headers: {}, data: {}, method: :get)
       debug_octokit! if verbose_logging?
 
-      Octokit.api_endpoint = Underway::Settings.configuration.raw["github_api_host"]
+      Octokit.api_endpoint = Underway::Settings.configuration.github_api_host
 
       if !headers[:authorization] && !headers["Authorization"]
         Octokit.bearer_token = generate_jwt
@@ -37,7 +37,7 @@ module Underway
       return if token.nil?
 
       client = Octokit::Client.new(
-        api_endpoint: Underway::Settings.configuration.raw["github_api_host"],
+        api_endpoint: Underway::Settings.configuration.github_api_host,
         access_token: token
       )
     end

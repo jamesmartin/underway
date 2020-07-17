@@ -81,7 +81,7 @@ end
 You can also configure Underway by individually setting its configuration
 attributes:
 
-```
+```ruby
 require "underway"
 
 Underway::Settings.configure do |config|

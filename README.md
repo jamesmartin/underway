@@ -74,6 +74,8 @@ Sinatra application, do something like this:
 require "underway"
 
 Underway::Settings.configure do |config|
+  # Note: config.app_root is no longer supported as of version 2.0. Just pass
+  # the absolute or relative path to the configuration file.
   config.config_filename = "./config.json"
 end
 ```

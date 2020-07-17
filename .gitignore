@@ -1,7 +1,7 @@
 config.json
 config.json.localhost
 config.json.prod*
-*.pem
+./*.pem
 *.db
 *.gem
 *.rbc

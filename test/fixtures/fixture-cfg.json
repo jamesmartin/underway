@@ -1,0 +1,10 @@
+{
+  "app_id":"fixture-app-id",
+  "client_id": "fixture-client-id",
+  "client_secret": "fixture-client-secret",
+  "database_url":"/fixture/db/url",
+  "github_api_host":"https://fixture.example.com",
+  "private_key_filename":"./test.pem",
+  "verbose_logging":true,
+  "webhook_secret":"fixture-webhook-secret"
+}

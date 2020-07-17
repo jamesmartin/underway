@@ -49,7 +49,7 @@ module Underway
         # JWT expiration time (10 minute maximum)
         exp: Time.now.to_i + (10 * 60),
         # GitHub Apps identifier
-        iss: Underway::Settings.config.app_issuer
+        iss: Underway::Settings.config.app_id
       }
 
       JWT.encode(payload, Underway::Settings.config.private_key, "RS256")

@@ -5,21 +5,37 @@ require "json"
 module Underway
   class Settings
     class Configuration
-      attr_reader :config, :logger
+      SUPPORTED_SETTINGS = [
+        :app_id,
+        :app_root,
+        :client_id,
+        :client_secret,
+        :database_url,
+        :logger,
+        :private_key,
+        :private_key_filename,
+        :webhook_secret,
+      ].freeze
+
+      attr_reader :app_id, :app_root, :client_id, :client_secret, :database_url, :logger
+
 
       def initialize
         @logger = Underway::Logger.new
       end
 
       def load!
-        @config = JSON.parse(
-          @app_root.join(@config_filename).read
-        )
-      end
+        if @config_filename
+          config = JSON.parse(
+            app_root.join(@config_filename).read
+          )
 
-      # TODO: deprecate
-      def raw
-        @config
+          SUPPORTED_SETTINGS.each do |setting|
+            if config[setting]
+              send("#{setting}=", config[setting])
+            end
+          end
+        end
       end
 
       def app_root=(directory)
@@ -34,18 +50,30 @@ module Underway
         @logger = logger
       end
 
+      def database_url=(url)
+        @database_url = url
+      end
+
       def db
         @db ||=
           begin
-            Underway::DB.configure(config["database_url"])
+            Underway::DB.configure(database_url)
             Underway::DB.instance.database
           end
       end
 
       # The Integration ID
       # From "About -> ID" at github.com/settings/apps/<app-name>
-      def app_issuer
-        @app_issuer ||= config["app_id"]
+      def app_id=(id)
+        @app_id = id
+      end
+
+      def client_id=(id)
+        @client_id = id
+      end
+
+      def client_secret=(secret)
+        @client_secret = secret
       end
 
       # Integration webhook secret (for validating that webhooks come from GitHub)
@@ -53,8 +81,12 @@ module Underway
         @webhook_secret ||= config["webhook_secret"]
       end
 
+      def webhook_secret=(secret)
+        @webhook_secret = secret
+      end
+
       def private_key_filename
-        @app_root.join(config["private_key_filename"])
+        app_root.join(private_key_filename)
       end
 
       # PEM file for request signing (PKCS#1 RSAPrivateKey format)
@@ -63,13 +95,28 @@ module Underway
         @private_pem ||= File.read(private_key_filename)
       end
 
-      # Private Key for the App, generated based on the PEM file
+      # Private Key for the App.
+      # Either the explicitly configured private_key value or the contents of
+      # the configured private_key_filename.
       def private_key
-        @private_key ||= OpenSSL::PKey::RSA.new(private_pem)
+        @private_key ||=
+          if private_key_filename.nil?
+            private_key
+          else
+            OpenSSL::PKey::RSA.new(private_pem)
+          end
+      end
+
+      def private_key=(key)
+        @private_key = key
       end
 
       def verbose_logging
         @verbose ||= config["verbose_logging"]
+      end
+
+      def verbose_logging=(verbose)
+        @verbose_logging = !!verbose
       end
 
       def token_cache
@@ -78,7 +125,7 @@ module Underway
 
       def oauth_authorize_url
         uri = Addressable::URI.parse(config["github_api_host"])
-        "#{uri.scheme}://#{uri.domain}/login/oauth/authorize?client_id=#{config["client_id"]}"
+        "#{uri.scheme}://#{uri.domain}/login/oauth/authorize?client_id=#{client_id}"
       end
 
       def oauth_access_token_url(code)
@@ -90,8 +137,8 @@ module Underway
           "scheme" => api_host.scheme,
           "host" => api_host.domain,
           "code" => code,
-          "client_id" => config["client_id"],
-          "client_secret" => config["client_secret"]
+          "client_id" => client_id,
+          "client_secret" => client_secret
         )
       end
     end

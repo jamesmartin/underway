@@ -7,7 +7,6 @@ module Underway
     class Configuration
       SUPPORTED_SETTINGS = [
         :app_id,
-        :app_root,
         :client_id,
         :client_secret,
         :database_url,
@@ -19,8 +18,8 @@ module Underway
         :webhook_secret,
       ].freeze
 
-      attr_reader :app_id, :app_root, :client_id, :client_secret, :database_url,
-        :github_api_host, :logger, :verbose_logging, :webhook_secret
+      attr_reader :app_id, :client_id, :client_secret, :database_url,
+        :github_api_host, :private_key_filename, :logger, :verbose_logging, :webhook_secret, :config_filename
 
 
       def initialize
@@ -28,21 +27,17 @@ module Underway
       end
 
       def load!
-        if @config_filename
+        if config_filename
           config = JSON.parse(
-            app_root.join(@config_filename).read
+            Pathname.new(config_filename).read
           )
 
-          SUPPORTED_SETTINGS.each do |setting|
+          SUPPORTED_SETTINGS.map(&:to_s).each do |setting|
             if config[setting]
               send("#{setting}=", config[setting])
             end
           end
         end
-      end
-
-      def app_root=(directory)
-        @app_root = Pathname.new(directory).dirname
       end
 
       def config_filename=(filename)
@@ -88,14 +83,14 @@ module Underway
         @webhook_secret = secret
       end
 
-      def private_key_filename
-        app_root.join(private_key_filename)
+      def private_key_filename=(filename)
+        @private_key_filename = filename
       end
 
       # PEM file for request signing (PKCS#1 RSAPrivateKey format)
       # (Download from github.com/settings/apps/<app-name> "Private key")
       def private_pem
-        @private_pem ||= File.read(private_key_filename)
+        @private_pem ||= Pathname.new(private_key_filename).read
       end
 
       # Private Key for the App.
@@ -103,15 +98,13 @@ module Underway
       # the configured private_key_filename.
       def private_key
         @private_key ||=
-          if private_key_filename.nil?
-            private_key
-          else
+          unless private_key_filename.nil?
             OpenSSL::PKey::RSA.new(private_pem)
           end
       end
 
       def private_key=(key)
-        @private_key = key
+        @private_key = OpenSSL::PKey::RSA.new(key)
       end
 
       def verbose_logging=(verbose)
@@ -148,6 +141,8 @@ module Underway
       attr_reader :configuration
 
       def configure
+        reset_configuration!
+
         if block_given?
           yield configuration
         else
@@ -157,9 +152,8 @@ module Underway
         configuration.load!
       end
 
-      # TODO: remove me
-      def config
-        configuration
+      def reset_configuration!
+        @configuration = Configuration.new
       end
     end
 

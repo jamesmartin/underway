@@ -24,6 +24,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake"
   spec.add_development_dependency "sinatra"
   spec.add_development_dependency "timecop"
+  spec.add_development_dependency "webmock"
 
   spec.add_runtime_dependency "addressable", "~> 2.3"
   spec.add_runtime_dependency "jwt", "~> 2.1"

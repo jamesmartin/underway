@@ -1,18 +1,28 @@
-name: RSpec
+name: Minitest
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
+
+    strategy:
+      matrix:
+        ruby: ["2.7", "3.0"]
 
     steps:
     - uses: actions/checkout@master
-    - name: Set up Ruby 2.5
-      uses: actions/setup-ruby@v1
+    - name: Set up Ruby ${{ matrix.ruby }}
+      uses: ruby/setup-ruby@v1
       with:
-        ruby-version: 2.5.x
+        ruby-version: ${{ matrix.ruby }}
     - name: Build and test with Rake
       run: |
         sudo apt-get install libsqlite3-dev

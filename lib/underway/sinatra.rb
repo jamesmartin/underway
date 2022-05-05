@@ -17,8 +17,8 @@ module Sinatra
       end
     end
 
-    def gh_api(*args)
-      ::Underway::Api.invoke(*args)
+    def gh_api(route, **kwargs)
+      ::Underway::Api.invoke(route, **kwargs)
     end
   end
 end
